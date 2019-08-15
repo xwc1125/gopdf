@@ -13,7 +13,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"errors"
-	"flag"
 	"fmt"
 	"io"
 	"sort"
@@ -21,7 +20,6 @@ import (
 	"time"
 
 	"github.com/xwc1125/gopdf/common"
-	"github.com/xwc1125/gopdf/common/license"
 	"github.com/xwc1125/gopdf/core"
 	"github.com/xwc1125/gopdf/core/security"
 	"github.com/xwc1125/gopdf/core/security/crypt"
@@ -94,16 +92,6 @@ func getPdfModifiedDate() time.Time {
 // SetPdfModifiedDate sets the ModDate attribute of the output PDF.
 func SetPdfModifiedDate(modifiedDate time.Time) {
 	pdfCreationDate = modifiedDate
-}
-
-func getPdfProducer() string {
-	licenseKey := license.GetLicenseKey()
-	if len(pdfProducer) > 0 && (licenseKey.IsLicensed() || flag.Lookup("test.v") != nil) {
-		return pdfProducer
-	}
-
-	// Return default.
-	return fmt.Sprintf("UniDoc v%s (%s) - http://unidoc.io", getUniDocVersion(), licenseKey.TypeToString())
 }
 
 // SetPdfProducer sets the Producer attribute of the output PDF.
@@ -202,7 +190,6 @@ func NewPdfWriter() PdfWriter {
 		key   core.PdfObjectName
 		value string
 	}{
-		{"Producer", getPdfProducer()},
 		{"Creator", getPdfCreator()},
 		{"Author", getPdfAuthor()},
 		{"Subject", getPdfSubject()},
@@ -633,11 +620,6 @@ func (w *PdfWriter) AddPage(page *PdfPage) error {
 }
 
 func procPage(p *PdfPage) {
-	lk := license.GetLicenseKey()
-	if lk != nil && lk.IsLicensed() {
-		return
-	}
-
 	// Add font, if needed.
 	fontName := core.PdfObjectName("UF1")
 	if !p.Resources.HasFontByName(fontName) {
@@ -648,12 +630,10 @@ func procPage(p *PdfPage) {
 	ops = append(ops, "q")
 	ops = append(ops, "BT")
 	ops = append(ops, fmt.Sprintf("/%s 14 Tf", fontName.String()))
-	//ops = append(ops, "1 0 0 rg")
-	//ops = append(ops, "10 10 Td")
-	//s := "Unlicensed UniDoc - Get a license on https://unidoc.io"
-	//ops = append(ops, fmt.Sprintf("(%s) Tj", s))
-	//ops = append(ops, "ET")
-	//ops = append(ops, "Q")
+	ops = append(ops, "1 0 0 rg")
+	ops = append(ops, "10 10 Td")
+	ops = append(ops, "ET")
+	ops = append(ops, "Q")
 	contentstr := strings.Join(ops, "\n")
 
 	p.AddContentStreamByString(contentstr)

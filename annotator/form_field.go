@@ -8,7 +8,6 @@ package annotator
 import (
 	"bytes"
 	"errors"
-
 	"github.com/xwc1125/gopdf/contentstream"
 	"github.com/xwc1125/gopdf/core"
 	"github.com/xwc1125/gopdf/model"
@@ -275,13 +274,15 @@ func NewSignatureField(signature *model.PdfSignature, lines []*SignatureLine, op
 		return nil, errors.New("signature cannot be nil")
 	}
 
-	apDict, err := genFieldSignatureAppearance(lines, opts)
-	if err != nil {
-		return nil, err
-	}
-
 	field := model.NewPdfFieldSignature(signature)
 	field.Rect = core.MakeArrayFromFloats(opts.Rect)
-	field.AP = apDict
+
+	if lines != nil {
+		apDict, err := genFieldSignatureAppearance(lines, opts)
+		if err != nil {
+			return nil, err
+		}
+		field.AP = apDict
+	}
 	return field, nil
 }
