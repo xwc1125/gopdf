@@ -11,7 +11,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
-	"github.com/xwc1125/gopdf/model/pkcs12/internal/rc2"
+	"github.com/xwc1125/gopdf/lib/pkcs12/internal/rc2"
 )
 
 var (

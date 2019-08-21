@@ -7,12 +7,13 @@ package sighandler
 
 import (
 	"bytes"
+	"crypto"
 	"crypto/ecdsa"
 	"crypto/x509"
 	"errors"
-	"github.com/gunnsth/pkcs7"
 	"github.com/xwc1125/gopdf/core"
 	"github.com/xwc1125/gopdf/model"
+	"github.com/xwc1125/gopdf/lib/pkcs7"
 )
 
 // Adobe ECC detached signature handler.
@@ -24,7 +25,7 @@ type adobeECCDetached struct {
 	emptySignatureLen int
 }
 
-// NewEmptyAdobeECCDetached creates a new Adobe.PPKMS/Adobe.PPKLite adbe.ECC.detached
+// NewEmptyAdobePKCS7Detached creates a new Adobe.PPKMS/Adobe.PPKLite adbe.pkcs7.detached
 // signature handler. The generated signature is empty and of size signatureLen.
 // The signatureLen parameter can be 0 for the signature validation.
 func NewEmptyAdobeECCDetached(signatureLen int) (model.SignatureHandler, error) {
@@ -83,7 +84,17 @@ func (a *adobeECCDetached) getCertificate(sig *model.PdfSignature) (*x509.Certif
 
 // NewDigest creates a new digest.
 func (a *adobeECCDetached) NewDigest(sig *model.PdfSignature) (model.Hasher, error) {
+	//certificate, err := a.getCertificate(sig)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//h, _ := getHashFromSignatureAlgorithmECC(certificate.SignatureAlgorithm)
+	//return h.New(), nil
 	return bytes.NewBuffer(nil), nil
+}
+
+func getHashFromSignatureAlgorithmECC(sa x509.SignatureAlgorithm) (crypto.Hash, bool) {
+	return crypto.SHA256, true
 }
 
 // Validate validates PdfSignature.
@@ -123,7 +134,7 @@ func (a *adobeECCDetached) Sign(sig *model.PdfSignature, digest model.Hasher) er
 	if err != nil {
 		return err
 	}
-
+	signedData.SetEncryptionAlgorithm(pkcs7.OIDDigestAlgorithmECDSASHA1)
 	// Add the signing cert and private key
 	if err := signedData.AddSigner(a.certificate, a.privateKey, pkcs7.SignerInfoConfig{}); err != nil {
 		return err
@@ -139,10 +150,10 @@ func (a *adobeECCDetached) Sign(sig *model.PdfSignature, digest model.Hasher) er
 	}
 
 	//data := make([]byte, 8192)
-	data := make([]byte, 8192 * 2 + 2)
+	data := make([]byte, 8192)
 	copy(data, detachedSignature)
 
-	// contents=8192 * 2 + 2
+	// contents=8192
 	sig.Contents = core.MakeHexString(string(data))
 	return nil
 }

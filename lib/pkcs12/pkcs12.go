@@ -244,6 +244,7 @@ func Decode(pfxData []byte, password string) (privateKey interface{}, certificat
 			if err != nil {
 				return nil, nil, err
 			}
+
 			certs, err := x509.ParseCertificates(certsData)
 			if err != nil {
 				return nil, nil, err

@@ -18,7 +18,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/pkcs12"
+	"github.com/xwc1125/gopdf/lib/pkcs12"
 
 	"github.com/xwc1125/gopdf/annotator"
 	"github.com/xwc1125/gopdf/common"
