@@ -7,13 +7,12 @@ package sighandler
 
 import (
 	"bytes"
-	"crypto"
 	"crypto/ecdsa"
 	"crypto/x509"
 	"errors"
+	"github.com/gunnsth/pkcs7"
 	"github.com/xwc1125/gopdf/core"
 	"github.com/xwc1125/gopdf/model"
-	"github.com/xwc1125/gopdf/lib/pkcs7"
 )
 
 // Adobe ECC detached signature handler.
@@ -58,7 +57,7 @@ func (a *adobeECCDetached) InitSignature(sig *model.PdfSignature) error {
 	handler := *a
 	sig.Handler = &handler
 	sig.Filter = core.MakeName("Adobe.PPKLite")
-	sig.SubFilter = core.MakeName("ETSI.CAdES.detached")
+	sig.SubFilter = core.MakeName("adbe.pkcs7.detached")
 	sig.Reference = nil
 
 	digest, err := handler.NewDigest(sig)
@@ -84,17 +83,7 @@ func (a *adobeECCDetached) getCertificate(sig *model.PdfSignature) (*x509.Certif
 
 // NewDigest creates a new digest.
 func (a *adobeECCDetached) NewDigest(sig *model.PdfSignature) (model.Hasher, error) {
-	//certificate, err := a.getCertificate(sig)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//h, _ := getHashFromSignatureAlgorithmECC(certificate.SignatureAlgorithm)
-	//return h.New(), nil
 	return bytes.NewBuffer(nil), nil
-}
-
-func getHashFromSignatureAlgorithmECC(sa x509.SignatureAlgorithm) (crypto.Hash, bool) {
-	return crypto.SHA256, true
 }
 
 // Validate validates PdfSignature.
@@ -149,7 +138,6 @@ func (a *adobeECCDetached) Sign(sig *model.PdfSignature, digest model.Hasher) er
 		return err
 	}
 
-	//data := make([]byte, 8192)
 	data := make([]byte, 8192)
 	copy(data, detachedSignature)
 
@@ -163,5 +151,5 @@ func (a *adobeECCDetached) IsApplicable(sig *model.PdfSignature) bool {
 	if sig == nil || sig.Filter == nil || sig.SubFilter == nil {
 		return false
 	}
-	return (*sig.Filter == "Adobe.PPKMS" || *sig.Filter == "Adobe.PPKLite") && *sig.SubFilter == "ETSI.CAdES.detached"
+	return (*sig.Filter == "Adobe.PPKMS" || *sig.Filter == "Adobe.PPKLite") && *sig.SubFilter == "adbe.pkcs7.detached"
 }

@@ -10,10 +10,10 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"errors"
+	"github.com/gunnsth/pkcs7"
 
 	"github.com/xwc1125/gopdf/core"
 	"github.com/xwc1125/gopdf/model"
-	"github.com/xwc1125/gopdf/lib/pkcs7"
 )
 
 // Adobe PKCS7 detached signature handler.
